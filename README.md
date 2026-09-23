@@ -1,6 +1,6 @@
 # YouTube Search Select
 
-![UI Sample](screenshots.png)
+![UI Sample](screenshot.png)
 
 A mpv Lua script that searches YouTube with `yt-dlp`, displays the results in a selectable grid, loads thumbnails, and plays or queues the selected video.
 
