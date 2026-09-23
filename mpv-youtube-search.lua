@@ -13,7 +13,7 @@ local opts = {
     search_key  = "Ctrl+s",
 }
 
-(require "mp.options").read_options(opts, "youtube-search-gui")
+(require "mp.options").read_options(opts, "mpv-youtube-search")
 
 local function resolve_path(path)
     if path:sub(1, 3) == "~~/" then
@@ -82,8 +82,19 @@ local function resize_for_grid()
         return
     end
 
+    local window_width = mp.get_property_number("osd-width")
+        or mp.get_property_number("window-width")
+    local window_height = mp.get_property_number("osd-height")
+        or mp.get_property_number("window-height")
+    if window_width and window_height
+        and window_width >= GRID_WIDTH and window_height >= GRID_HEIGHT then
+        return
+    end
+
+    local target_width = math.max(GRID_WIDTH, window_width or GRID_WIDTH)
+    local target_height = math.max(GRID_HEIGHT, window_height or GRID_HEIGHT)
     state.saved_geometry = mp.get_property("geometry") or ""
-    mp.set_property("geometry", GRID_WIDTH .. "x" .. GRID_HEIGHT)
+    mp.set_property("geometry", target_width .. "x" .. target_height)
 end
 
 local function restore_window()
@@ -431,7 +442,7 @@ mp.observe_property("osd-dimensions", "native", function(name, val)
     if state.active then draw_grid() end
 end)
 
-mp.add_key_binding(opts.search_key, "youtube-search-gui", function()
+mp.add_key_binding(opts.search_key, "mpv-youtube-search", function()
     if state.active then
         close_grid()
         return
