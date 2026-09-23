@@ -1,5 +1,7 @@
 # YouTube Search Select
 
+![UI Sample](screenshot.png)
+
 A cross-platform mpv Lua script that searches YouTube with `yt-dlp`, renders a selectable grid with asynchronous thumbnail pipelines, and handles playback or playlist appending.
 
 ## Requirements
