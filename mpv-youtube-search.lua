@@ -101,6 +101,8 @@ local state = {
     fetching = false,
     thumbnail_status = {},
     saved_geometry = nil,
+    feedback = nil,
+    feedback_timer = nil,
 }
 
 local ov_ass = mp.create_osd_overlay("ass-events")
@@ -137,6 +139,17 @@ local function restore_window()
         mp.set_property("geometry", state.saved_geometry)
         state.saved_geometry = nil
     end
+end
+
+local function show_feedback(text)
+    state.feedback = text
+    if state.feedback_timer then state.feedback_timer:kill() end
+    state.feedback_timer = mp.add_timeout(2.5, function()
+        state.feedback = nil
+        state.feedback_timer = nil
+        if state.active then draw_grid() end
+    end)
+    draw_grid()
 end
 
 --------------------------------------------------------------------------
@@ -274,6 +287,9 @@ function draw_grid()
     
     local head_y = math.max(10, START_Y - 70)
     ass = ass .. string.format("{\\an7\\pos(%d,%d)}{\\fs40\\b1\\1a&H00&\\1c&HFFFFFF&}⌕ Search: %s (Page %d){\\b0}\n", START_X, head_y, escape_ass(state.query), state.page)
+    if state.feedback then
+        ass = ass .. string.format("{\\an8\\pos(%d,55)}{\\fs24\\b1\\1c&HFFFFFF&\\3c&H0088CC&\\bord3} %s {\\b0}\n", osd_w / 2, escape_ass(state.feedback))
+    end
     
     clear_overlays()
 
@@ -342,6 +358,9 @@ local function close_grid()
     state.active = false
     ov_ass:remove()
     clear_overlays()
+    if state.feedback_timer then state.feedback_timer:kill() end
+    state.feedback = nil
+    state.feedback_timer = nil
     restore_window()
     mp.remove_key_binding("grid-up")
     mp.remove_key_binding("grid-down")
@@ -381,7 +400,7 @@ local function execute_selection(append)
     local url = entry_url(e)
     if append then
         mp.commandv("loadfile", url, "append-play")
-        mp.osd_message("Appended: " .. (e.title or url), 3)
+        show_feedback("Added to playlist: " .. (e.title or url))
     else
         mp.commandv("loadfile", url, "replace")
         close_grid()
