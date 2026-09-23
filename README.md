@@ -1,29 +1,29 @@
 # YouTube Search Select
 
-![UI Sample](screenshot.png)
-
-A mpv Lua script that searches YouTube with `yt-dlp`, displays the results in a selectable grid, loads thumbnails, and plays or queues the selected video.
+A cross-platform mpv Lua script that searches YouTube with `yt-dlp`, renders a selectable grid with asynchronous thumbnail pipelines, and handles playback or playlist appending.
 
 ## Requirements
 
-- mpv with Lua script support
-- `yt-dlp` installed and available in `PATH`
-- `ffmpeg` installed and available in `PATH`
-- Network access to YouTube
-
-The script can also use explicit executable paths if the commands are not available in `PATH`.
+* mpv with Lua script support
+* `yt-dlp` installed and available in `PATH` (or configured via path options)
+* `ffmpeg` installed and available in `PATH` (or configured via path options)
+* Network access to YouTube
 
 ## Installation
 
-1. Copy `mpv-youtube-search.lua` into mpv's `portable_config/scripts` directory.
+1. Copy `mpv-youtube-search.lua` into mpv's script directory:
+* **Windows (portable)**: `portable_config/scripts/`
+* **Linux / macOS**: `~/.config/mpv/scripts/`
+
+
 2. Restart mpv.
 3. Press `Ctrl+s` to open the search prompt.
 
-The script creates a `ytsearch_bgra` folder inside mpv's config directory for converted thumbnail frames.
+Thumbnail frames are cached inside mpv's config directory under `~~/ytsearch_bgra/`.
 
 ## Configuration
 
-The defaults are defined near the top of the Lua file:
+Defaults defined at the top of the Lua file:
 
 ```lua
 local opts = {
@@ -32,85 +32,71 @@ local opts = {
     page_size   = 8,
     search_key  = "Ctrl+s",
 }
+
 ```
 
-You can override them through an mpv script-options file:
+Override via mpv script-options:
 
-`portable_config/script-opts/mpv-youtube-search.conf`
+* **Windows**: `portable_config/script-opts/mpv-youtube-search.conf`
+* **Linux/macOS**: `~/.config/mpv/script-opts/mpv-youtube-search.conf`
 
-Example:
+Example `.conf`:
 
 ```ini
-yt_dlp_path=C:/Tools/yt-dlp.exe
-ffmpeg_path=C:/Tools/ffmpeg.exe
+yt_dlp_path=yt-dlp
+ffmpeg_path=ffmpeg
 page_size=8
 search_key=Ctrl+s
+
 ```
 
-Use forward slashes in Windows paths, or escape backslashes appropriately.
+*(Supports `~~/` path expansion, e.g., `yt_dlp_path = ~~/_bin/yt-dlp`)*
 
 ## Controls
 
 | Key | Action |
 | --- | --- |
 | `Ctrl+s` | Open the YouTube search prompt |
-| `Up`, `Down`, `Left`, `Right` | Move the selection |
-| `Enter` | Play the selected result |
-| `Shift+Enter` | Append the selected result to the playlist |
+| `Up`, `Down`, `Left`, `Right` | Move selection (4-column grid) |
+| `Enter` | Play the selected result (replace) |
+| `Shift+Enter` | Append/queue the selected result |
 | `N` | Next page |
 | `P` | Previous page |
-| `Esc` | Close the results grid |
+| `Esc` | Close results grid and restore window geometry |
 
 ## Pagination
 
-The default page size is 8 results.
-
-Page 1 displays results 1-8. Page 2 requests enough results to display 9-16, so results are not skipped between pages. Change `page_size` to alter the number of results per page.
+Default page size is `8` items (4 columns × 2 rows). Page calculation fetches `page * page_size` items sequentially to prevent offset skipping.
 
 ## Thumbnails
 
-Thumbnails initially show `Loading...`. They are downloaded through `yt-dlp` and converted locally with `ffmpeg`. `No Image` is shown only when the download or conversion fails.
+* Displays `Loading...` asynchronously while fetching/converting.
+* Fetches poster via `yt-dlp`, converts to raw BGRA via `ffmpeg` (`320x180`), and caches per page (`<vid_id>_p<page>.bgra`).
+* Falls back to `No Image` placeholder vector card if download/conversion fails.
 
-Thumbnails are cached as BGRA frames in:
+## Window Behavior
 
-```text
-portable_config/ytsearch_bgra/
-```
-
-## Window behavior
-
-When a search starts, a normal, non-maximized mpv window is resized to the grid layout size configured in the Lua file:
+Target layout dimensions:
 
 ```lua
 local GRID_WIDTH, GRID_HEIGHT = 1360, 900
+
 ```
 
-The original window geometry is restored when the grid closes, a video is selected, or the search fails. Fullscreen and maximized windows are not resized.
+Non-fullscreen/non-maximized windows resize to fit the grid target footprint and restore previous geometry upon closing or playback execution.
 
 ## Troubleshooting
 
-### Search fails with status `-2`
+### Search fails with status `-2` or subprocess spawn error
 
-Check that mpv can start `yt-dlp`:
+* Check binary availability:
+* Windows: `where yt-dlp` / `where ffmpeg`
+* Linux/macOS: `which yt-dlp` / `which ffmpeg`
 
-```bat
-where yt-dlp
-yt-dlp --version
-```
 
-If mpv was started before installing or changing `PATH`, fully restart mpv.
+* If using conda/venv wrappers on Windows, point `yt_dlp_path` directly to the compiled `.exe` or ensure PATH inheritance reaches mpv GUI launcher.
 
-### Thumbnails do not appear
+### Thumbnails show `No Image` or stuck on `Loading...`
 
-Check that ffmpeg is available:
-
-```bat
-where ffmpeg
-ffmpeg -version
-```
-
-If it is not available through `PATH`, set an explicit `ffmpeg_path` in `mpv-youtube-search.conf`.
-
-### Search works only after opening a video
-
-The search subprocess is configured with `playback_only = false`, so it should work while mpv is idle. Restart mpv after updating the script if the old behavior persists.
+* Verify `ffmpeg` output stream / CLI availability.
+* Check write permissions for `~~/ytsearch_bgra`.
