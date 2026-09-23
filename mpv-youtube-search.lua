@@ -30,6 +30,7 @@ local COLS = 4
 local BASE_ID = 1
 local EXPECTED_SIZE = THUMB_W * THUMB_H * 4 -- 230400 bytes
 local GRID_WIDTH, GRID_HEIGHT = 1360, 900
+local MAX_THUMB_CACHE_BYTES = 64 * 1024 * 1024
 
 --------------------------------------------------------------------------
 -- Pathing
@@ -43,6 +44,40 @@ if is_windows then
     os.execute('mkdir "' .. thumb_dir:gsub("/", "\\") .. '" 2>nul')
 else
     os.execute('mkdir -p "' .. thumb_dir .. '"')
+end
+
+local function cleanup_thumbnail_cache()
+    local files = utils.readdir(thumb_dir, "files") or {}
+    local cached = {}
+    local total_size = 0
+
+    for _, name in ipairs(files) do
+        if name:match("%.bgra$") then
+            local path = thumb_dir .. "/" .. name
+            local info = utils.file_info(path)
+            if info and info.size then
+                total_size = total_size + info.size
+                table.insert(cached, {
+                    path = path,
+                    size = info.size,
+                    mtime = info.mtime or 0,
+                })
+            end
+        end
+    end
+
+    if total_size <= MAX_THUMB_CACHE_BYTES then return end
+
+    table.sort(cached, function(left, right)
+        return left.mtime < right.mtime
+    end)
+
+    for _, file in ipairs(cached) do
+        if total_size <= MAX_THUMB_CACHE_BYTES then break end
+        if os.remove(file.path) then
+            total_size = total_size - file.size
+        end
+    end
 end
 
 local function get_bgra_path(vid_id, page)
@@ -452,6 +487,7 @@ mp.add_key_binding(opts.search_key, "mpv-youtube-search", function()
         prompt = "Search YouTube:",
         submit = function(query)
             if query == nil or query:match("^%s*$") then return end
+            cleanup_thumbnail_cache()
             resize_for_grid()
             fetch_and_render(query, 1)
         end,
