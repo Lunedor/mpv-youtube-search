@@ -82,13 +82,12 @@ end
 
 local feed_menu_key = "Ctrl+y"
 local direct_feed_keys = {
-    home = "h",
-    subscriptions = "s",
-    history = "r",
-    watch_later = "w",
-    liked = "l",
+    home = "Ctrl+H",
+    subscriptions = "Ctrl+S",
+    history = "Ctrl+R",
+    watch_later = "Ctrl+W",
+    liked = "Ctrl+L",
 }
-
 --------------------------------------------------------------------------
 -- Paths & Cookie handling
 --------------------------------------------------------------------------
