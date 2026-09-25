@@ -2,6 +2,8 @@
 
 ![UI Sample](screenshot.png)
 
+I added a beta version that uses cookies for personalization, but I can only manage cookies with Firefox, so it depends on your system for other browsers. It adds a feature for a personalized recommendations page with Ctrl+Y; if you want to try it, you can download that version.
+
 A cross-platform mpv Lua script that searches YouTube with `yt-dlp`, renders a selectable grid with asynchronous thumbnail pipelines, and handles playback or playlist appending.
 
 ## Requirements
