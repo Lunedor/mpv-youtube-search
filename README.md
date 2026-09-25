@@ -37,7 +37,7 @@ Everything the basic version has, plus:
   - Watch history
   - Watch Later
   - Liked videos
-- Feed menu (`Ctrl+y`) and direct keys (`h`, `s`, `r`, `w`, `l`).
+- Feed menu (`Ctrl+y`) and direct keys (`Ctrl+Shift+h`, `Ctrl+Shift+s`, `Ctrl+Shift+r`, `Ctrl+Shift+w`, `Ctrl+Shift+l`).
 - Cookie refresh from Firefox at startup.
 
 > Cookie support currently works reliably only with **Firefox** on Windows and most Linux setups.  
@@ -152,11 +152,11 @@ feed_key=Ctrl+y
 | Key | Action |
 | --- | --- |
 | `Ctrl+y` | Open the YouTube feeds menu |
-| `h` | Open Home / Recommended |
-| `s` | Open Subscriptions |
-| `r` | Open Watch history |
-| `w` | Open Watch Later |
-| `l` | Open Liked videos |
+| `Ctrl+Shift+h` | Open Home / Recommended |
+| `Ctrl+Shift+s` | Open Subscriptions |
+| `Ctrl+Shift+r` | Open Watch history |
+| `Ctrl+Shift+w` | Open Watch Later |
+| `Ctrl+Shift+l` | Open Liked videos |
 | `Up/Down` or `j/k` (in menu) | Select feed |
 | `Enter` (in menu) | Open selected feed |
 | `Esc` (in menu) | Close menu |
