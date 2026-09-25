@@ -45,21 +45,13 @@ Everything the basic version has, plus:
 
 #### Screenshots – Extended version
 
-You can replace these with your own images:
-
-- Home feed:
-
-  ![Home Feed](screenshot-extended-home.png)
-
 - Feed selection menu:
 
   ![Feed Menu](screenshot-extended-menu.png)
+  
+- Home feed:
 
-- Subscriptions / History (example):
-
-  ![Subscriptions](screenshot-extended-subs.png)
-
-*(Upload images with these names into the repo, or edit the paths to match your filenames.)*
+  ![Home Feed](screenshot-extended-home.png)
 
 ---
 
